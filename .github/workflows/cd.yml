@@ -16,19 +16,22 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.23.0"
+          go-version: '1.23.0'
 
-      - name: Build production binary
+      - name: Build app
         run: ./scripts/buildprod.sh
 
-      - name: Setup gcloud CLI
-        uses: google-github-actions/setup-gcloud@v1
+      - id: auth
+        uses: google-github-actions/auth@v2
         with:
-          project_id: gen-lang-client-0858969440
-          service_account_key: ${{ secrets.GCP_CREDENTIALS }}
-          export_default_credentials: true
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Use gcloud CLI
+        run: gcloud info
 
       - name: Build and push Docker image
-        run: |
-          gcloud builds submit --tag us-central1-docker.pkg.dev/gen-lang-client-0858969440/notely-ar-repo:latest .
+        run: gcloud builds submit --tag REGION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE:TAG .
 
